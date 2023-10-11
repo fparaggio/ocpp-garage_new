@@ -58,6 +58,7 @@ services:
   manager:
     container_name: csms-manager
     build:
+      context: .
       dockerfile: Dockerfile
       args:
         GITHUB_TOKEN: "${GITHUB_TOKEN}"

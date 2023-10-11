@@ -11,11 +11,13 @@ export function usePagination({ itemsLoader }) {
   let timeout = null;
 
   const fetchData = (args) => {
-    commit("setGlobalLoading");
     let query = Object.assign(
       { page: currentPage.value, search: search.value },
       args || {}
     );
+    if (!query.periodic) {
+      commit("setGlobalLoading");
+    }
     itemsLoader(query).then((response) => {
       if (!response.items.length && currentPage.value > 1) {
         currentPage.value--;
