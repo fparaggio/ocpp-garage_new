@@ -104,8 +104,8 @@
             </p>
           </v-chip>
         </v-card-subtitle>
-        <v-chip color="red">
-          <p v-if="connector.error_code" class="text-medium-emphasis">
+        <v-chip color="red" v-if="connector.error_code !== 'NoError'">
+          <p class="text-medium-emphasis">
             {{ connector.error_code }}
           </p>
         </v-chip>
