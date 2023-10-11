@@ -41,7 +41,7 @@ services:
 
   ws_server:
     container_name: ws_server
-    image: heroyooki/charge_point_node:latest
+    image: heroyooki/charge_point_node:garage-jueng-74391
     restart: always
     ports:
       - "${WS_SERVER_PORT}:${WS_SERVER_PORT}"
