@@ -1,0 +1,121 @@
+version: "3.0"
+
+services:
+  rabbitmq:
+    image: rabbitmq:3.12.0-management
+    restart: always
+    container_name: csms-rabbitmq
+    env_file:
+      - .env
+    ports:
+      - "5673:${RABBITMQ_PORT}"
+      - "15673:${RABBITMQ_UI_PORT}"
+    environment:
+      RABBITMQ_DEFAULT_USER: "${RABBITMQ_USER}"
+      RABBITMQ_DEFAULT_PASS: "${RABBITMQ_PASS}"
+    healthcheck:
+      test: "exit 0"
+    networks:
+      - app-network
+
+  db:
+    image: postgres:15.3-bullseye
+    restart: always
+    container_name: csms-db
+    volumes:
+      - ./data/postgres:/data
+    env_file:
+      - .env
+    ports:
+      - "5433:${DB_PORT}"
+    environment:
+      POSTGRES_USER: "${DB_USER}"
+      POSTGRES_PASSWORD: "${DB_PASSWORD}"
+      POSTGRES_DB: "${DB_NAME}"
+      PGDATA: "/data"
+    healthcheck:
+      test: "exit 0"
+    networks:
+      - app-network
+
+
+  ws_server:
+    container_name: ws_server
+    image: heroyooki/charge_point_node:latest
+    restart: always
+    ports:
+      - "${WS_SERVER_PORT}:${WS_SERVER_PORT}"
+    env_file:
+      - .env
+    command: >
+      sh -c "cd /usr/src/app && python main.py"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - app-network
+  
+  manager:
+    container_name: csms-manager
+    build:
+      dockerfile: Dockerfile
+      args:
+        GITHUB_TOKEN: "${GITHUB_TOKEN}"
+    volumes:
+      - ./backend:/usr/src/csms/backend
+    ports:
+      - "${HTTP_SERVER_PORT}:${HTTP_SERVER_PORT}"
+    env_file:
+      - .env
+    networks:
+      - app-network
+    restart: always
+    command: >
+      sh -c "cd /usr/src/csms/backend && alembic upgrade head &&
+             uvicorn main:app --host 0.0.0.0 --port ${HTTP_SERVER_PORT} --reload"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: "exit 0"
+
+  frontend:
+    container_name: frontend
+    restart: always
+    image: node:18.17-bullseye
+    volumes:
+      - ./frontend:/usr/src/csms/frontend
+    ports:
+      - "${UI_SERVER_PORT}:${UI_SERVER_PORT}"
+    networks:
+      - app-network
+    command: >
+      sh -c "cd /usr/src/csms/frontend && 
+             yarn install && yarn dev --port ${UI_SERVER_PORT} --host 0.0.0.0"
+    depends_on:
+      manager:
+        condition: service_healthy
+
+  nginx:
+    image: nginx:1.24.0-bullseye
+    ports:
+      - "80:80"
+    volumes:
+      - ./conf:/etc/nginx/conf.d
+    depends_on:
+      - frontend
+    networks:
+      - app-network
+
+  redis:
+    container_name: redis
+    image: redis:4-buster
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+

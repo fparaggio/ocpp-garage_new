@@ -1,0 +1,32 @@
+{
+  "hash": "77ebcc45",
+  "browserHash": "f67cd010",
+  "optimized": {
+    "vuetify/labs/VDataTable": {
+      "src": "../../node_modules/vuetify/lib/labs/VDataTable/index.mjs",
+      "file": "vuetify_labs_VDataTable.js",
+      "fileHash": "7a549e9f",
+      "needsInterop": false
+    },
+    "vue": {
+      "src": "../../node_modules/vue/dist/vue.runtime.esm-bundler.js",
+      "file": "vue.js",
+      "fileHash": "d23b7439",
+      "needsInterop": false
+    },
+    "vuetify": {
+      "src": "../../node_modules/vuetify/lib/framework.mjs",
+      "file": "vuetify.js",
+      "fileHash": "a628e3ce",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "chunk-AIHC7UEU": {
+      "file": "chunk-AIHC7UEU.js"
+    },
+    "chunk-QNGQRF5U": {
+      "file": "chunk-QNGQRF5U.js"
+    }
+  }
+}
